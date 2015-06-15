@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html ng-app='SVXLabel'>
+    <head>
+        <title>Svxl Labeler Videos</title>
+
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/style.css") }}' />
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/bootstrap.min.css") }}' />
+        <script src='{{ url_for("static", filename="js/bootstrap.min.js") }}'></script>
+        <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js'></script>
+        <script src='{{ url_for("static", filename="js/controllersSelect.js") }}'></script>
+
+    </head>
+
+    <body ng-controller='VideoCtrl'>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div><h1>Video: {{vidName}}</h1>
+            </div>
+        </div>
+        <div class="container-fluid" style="overflow: auto; max-width: 500px;">
+            
+            <br>
+            
+            <h4>Step 1. Supervoxel Labeling</h4>
+            <table class="table table-striped table-bordered table-condensed" style="max-width: 100%">
+                <tr>
+                    <th>Algorithm</th>
+                    <th>Status</th>
+                </tr>
+                
+                {% for n in algoList %}
+                <tr>
+                    <td>{{n}}</td>
+                    {% if algoList[n]==0 %}
+                    <td>
+                        <font color='red'>Unavailable</font>
+                    </td>
+                    {% elif algoList[n]==1 %}
+                    <td>
+                        <a href="/label/{{n}}/{{ vidName }}">Get Started!</a>
+                    </td>
+                    {% elif algoList[n]==2 %}
+                    <td>
+                        <a href="/label/{{n}}/{{ vidName }}">Started, Go!</a>
+                    </td>
+                    {% elif algoList[n]==3 %}
+                    <td>
+                        <font color='green'>Finished</font>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+            
+            
+            <h4>Step 2. Overlay 1 or more other algorithms</h4>
+            
+            <font size='4'><b>Algorithm:</b></font>
+            <div class="btn-group" data-toggle="buttons">
+                {% for n in algoList %}
+                {% if algoList[n]!=0 %}
+                <label class="btn btn-primary">
+                    <input type="radio" name="options" ng-click='updateLink("{{n}}")'>{{n}}
+                </label>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <br><br>
+            
+            <table class="table table-striped table-bordered table-condensed" style="max-width: 100%">
+                <tr>
+                    <th>Saved Labeled-Frame Source</th>
+                    <th>Status</th>
+                </tr>
+                
+                {% for n in algoList %}
+                {% if algoList[n]!=0 %}
+                <tr>
+                    <td>{{n}}</td>
+                    
+                    {% if algoList[n]==3 %}
+                    <td>
+                        <a href="/over/{{n}}/<% linkText %>/{{ vidName }}">
+                            <font color='#FE0000'><%text%></font>
+                            {% if output==3 %}
+                            <font color='red'>**Warning!** Saving from this page 
+                            will overwrite the currently saved output!</font>
+                            {% endif %}
+                        </a>
+                    </td>
+                    {% else %}
+                    <td>
+                        <font color='#E47200'>Not Ready</font>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+                {% endfor %}
+
+                <tr>
+                    <td>Output</td>
+                    {% if output==3 %}
+                    <td>
+                        <a href="/over/Output/<% linkText %>/{{ vidName }}"><font color='#FE0000'><%text%></font></a>
+                    </td>
+                    {% else %}
+                    <td>
+                        <font color='#E47200'>Not Ready</font>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
+            
+            <h4>Step 3. Touch up errors for final result</h4>
+            <table class="table table-striped table-bordered table-condensed" style="max-width: 100%">
+                <tr>
+                    <th>Post-Processing</th>
+                    {% if output==3 %}
+                    <td>
+                        <a href="/post/{{ vidName }}">Go!</a>
+                    </td>
+                    {% else %}
+                    <td>
+                        <font color='#E47200'>Not Ready</font>
+                    </td>
+                    {% endif %}
+                </tr>
+            </table>
+
+        </div>
+    </body>
+</html>

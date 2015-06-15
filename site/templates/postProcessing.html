@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html ng-app='SVXLabel'>
+    <head>
+        <title>Post-Processing Labeler</title>
+
+        <script type="text/javascript">
+            ALGO = "{{vid.algo}}";
+            VIDNAME = "{{vid.name}}";
+            READYPP = {{vid.numhier}};
+            VIDSTART = 1;
+            VIDLENGTH = {{vid.length}};
+            VIDWIDTH = {{vid.width}};
+            VIDHEIGHT = {{vid.height}};
+        </script>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/bootstrap.min.css") }}' />
+        <script src='{{ url_for("static", filename="js/bootstrap.min.js") }}'></script>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js'></script>
+        <script src='{{ url_for("static", filename="js/underscore-min.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/services.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/directivesPP.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/filters.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/controllersPP.js") }}'></script>
+
+        <link rel='stylesheet' href='{{ url_for("static", filename="css/app.css") }}' />
+    </head>
+
+    <body ng-controller='VideoCtrl'>
+        
+        <h3 style="display: inline-block;"> Labels </h3>
+        <br>
+        <label class="radio"
+               style='border-top: 20px solid rgb( <% color.r %>, <% color.g %>, <% color.b %> );'
+               ng-click='updateBrush()' 
+               ng-repeat='color in colors'>
+
+            <input type='radio'
+            ng-model='labels.selected'
+            value='<% $index %>'
+            name='label'>
+
+            <span><% color.name %></span>
+        </label>
+        
+        <br>
+
+        <script>
+            if (READYPP == 0) {
+                document.write("<h1><font color='red'>This video isn't ready!</font></h1>")
+                document.write("<h1><font color='red'>The supervoxels must be labeled first and at least one overlay should be used</font></h1>");
+            }
+            
+            document.write("<h3> Video: "+ VIDNAME +"</h3>");
+        </script>
+
+        <div class="form-inline">
+            Opacity:<input type='range' min='0' max='100' ng-model='opacity'>
+            <button ng-click='eyeDropper()'><%  eyeDropText %></button>
+        </div>
+        
+        <br>
+        
+        <!--Original Frames Canvas-->
+        <div style="position:relative;">
+        <canvas style="position: absolute; top: 0; left: 0; opacity: <% 1-(opacity / 100) %>; cursor:<% eyeDrop %>"
+        draw-image='/static/videos/{{vid.algo}}/{{vid.name}}/frames/<% frame|pad:5 %>.png'
+        ng-mousedown='backUp()'
+        m-drag='draw($event)'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        ></canvas>
+        </div>
+
+        <!--Labels Canvas-->
+        <canvas style="border:1px solid #000000;"
+        id="labeled"
+        draw-image='/static/videos/{{vid.algo}}/{{vid.name}}/labeled/<% frame|pad:5 %>.png'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        >Your browser does not support the HTML5 canvas tag.</canvas>
+
+        <fieldset>
+            <legend>Brush:</legend>
+            <input type='range' min='2' max='25' ng-model='side' ng-mouseup='updateBrush()'>
+            <canvas id='brush' style="border:1px solid #AAAAAA" width='<% side %>' height='<% side %>'></canvas>
+        </fieldset>
+
+        <div ng-show="!toggle">
+            <p>There are changes that haven't been saved.  Changing the frame will lose these changes.</p>
+            <button ng-click='saveTouchUps()'><font color="red">Save</font></button>
+            <button ng-click='ignore()'><font color="red">Ignore</font></button>
+        </div>
+
+        <br>
+
+        <div class="form-inline">
+            <button ng-click='bumpframe(-1)'>Prev</button>
+
+            <% frame|pad:5 %>
+
+            <button ng-click='bumpframe(1)'>Next</button>
+
+            <input id='fps' type='number' min='1' ng-model='fps'></input>
+            <button ng-click='play()'><% playtext %></button>
+            <button ng-click='jumpStart()'>Jump to Start</button>
+
+            <button ng-click='undoDraw()'>Undo</button>
+        </div>
+
+        <br>
+
+        <input style='width: 100%' 
+        type='range' 
+        min='1'
+        max='{{ vid.length }}'
+        readonly='true'
+        ng-model='frame' >
+
+        <button ng-click="saveTouchUps()">Save</button>
+        <span class="muted"><% save_status %></span>
+        
+        <br>
+
+    </body>
+</html>

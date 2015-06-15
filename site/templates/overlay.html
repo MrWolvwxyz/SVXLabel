@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html ng-app='SVXLabel'>
+    <head>
+        <title>Supervoxel Labeler</title>
+
+        <script type="text/javascript">
+            FRAMESRC = "{{framesrc}}";
+            ALGO = "{{vid.algo}}";
+            VIDNAME = "{{vid.name}}";
+            SVXTREE = {{svxtree | safe}};
+            NUMHIER = {{vid.numhier}};
+            VIDSTART = 1;
+            VIDLENGTH = {{vid.length}};
+            VIDWIDTH = {{vid.width}};
+            VIDHEIGHT = {{vid.height}};
+        </script>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/bootstrap.min.css") }}' />
+        <script src='{{ url_for("static", filename="js/bootstrap.min.js") }}'></script>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.0.4/angular.min.js'></script>
+        <script src='{{ url_for("static", filename="js/underscore-min.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/services.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/directives.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/filters.js") }}'></script>
+        <script src='{{ url_for("static", filename="js/controllersOL.js") }}'></script>
+
+        <link rel='stylesheet' href='{{ url_for("static", filename="css/app.css") }}' />
+    </head>
+
+    <body ng-controller='VideoCtrl'>
+
+        <h3 style="display: inline-block;"> Labels </h3>
+        <button ng-show="toggle" ng-click="toggle=!toggle">Edit</button>
+        <button ng-show="!toggle" ng-click="toggle=!toggle">Done</button>
+        <button ng-show="!toggle" ng-click='labels.addcolor()'>Add</button>
+        <button ng-show="!toggle" ng-click='labels.removecolor()'>Remove</button>
+        <a href="" ng-show="!toggle" ng-click='setRandomColor()'> colorpicker </a>
+        <button ng-show="!toggle" ng-click='labels.reset()'>Reset</button>
+        <br>
+        <label class="radio"
+               style='border-top: 20px solid rgb( <% color.r %>, <% color.g %>, <% color.b %> );' 
+               ng-repeat='color in colors'>
+
+            <input type='radio'
+            ng-model='labels.selected'
+            value='<% $index %>'
+            name='label'>
+
+            <span ng-show="toggle || color.name=='DELETE' || color.name=='void'"><% color.name %></span>
+            <span ng-show="!toggle && (color.name!='DELETE' && color.name!='void')">
+                <input type="text" ng-model="color.name">
+            </span>
+
+        </label>
+        <br>
+
+        <script>
+            document.write("<h3> Labeled Frame Source: "+ FRAMESRC +"</h3>");
+            document.write("<h3> Algorithm: "+ ALGO +"</h3>");
+            document.write("<h3> Video: "+ VIDNAME +"</h3>");
+        </script>
+        
+        <div class="form-inline">
+            Opacity:<input type='range' min='0' max='100' ng-model='opacity'>
+            <button ng-click='eyeDropper()'><%  eyeDropText %></button>
+        </div>
+
+
+        <!--Original Frames Canvas-->
+        <div style="position:relative;">
+        <canvas style="position: absolute; top: 0; left: 0; opacity: <% 1-(opacity / 100) %>; cursor:<% eyeDrop %>"
+        draw-image='/static/videos/{{vid.algo}}/{{vid.name}}/<% frame|pad:5 %>.png'
+        m-drag='label_supervoxel($event)'
+        m-wheel='bumpframe(delta)'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        >Your browser does not support the HTML5 canvas tag.</canvas>
+        </div>
+        <!--Overlayed Labeled Frames Canvas-->
+        <canvas bo-both='/static/videos/{{framesrc}}/{{vid.name}}/labeled/<% frame|pad:5 %>.png'
+        id='labeled'
+        lev0can='level0canvas'
+        style="border:1px solid #000000; cursor:<% eyeDrop %>"
+        m-drag='label_supervoxel($event)'
+        m-wheel='bumpframe(delta)'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        ></canvas>
+
+        <!--Segmentation Frames Canvas-->
+        <canvas style="border:1px solid #000000; cursor:<% eyeDrop %>"
+        draw-image='/static/videos/{{vid.algo}}/{{vid.name}}/<% hier|pad:2 %>/<% frame|pad:5 %>.png'      
+        img-data='svlabel'
+        m-drag='label_supervoxel($event)'
+        m-wheel='bumpframe(delta)'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        ></canvas>
+        
+        <!--Svxl Labels Canvas-->
+        <canvas style="border:1px solid #000000; cursor:<% eyeDrop %>"
+        svxl-data='level0canvas'
+        m-drag='label_supervoxel($event)'
+        m-wheel='bumpframe(delta)'
+        selected-label='labels.selected'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        ></canvas>
+
+        <!--Level 0 Labels Canvas (hidden)-->
+        <canvas draw-image='/static/videos/{{vid.algo}}/{{vid.name}}/00/<% frame|pad:5 %>.png'
+        img-data='level0canvas'
+        width='{{vid.width}}'
+        height='{{vid.height}}'
+        class = 'hide'
+        ></canvas>
+
+        <br>
+
+        <!--<% treedata %>-->
+
+        <div class="form-inline">
+            <button ng-click='bumpframe(-1)'>Prev</button>
+
+            <% frame|pad:5 %>
+
+            <button ng-click='bumpframe(1)'>Next</button>
+
+            <span play='frame' ></span>
+
+            <button ng-click='undosv()'>Undo</button>
+            <select 
+                ng-model='hier'
+                ng-options='val as val for val in hierarchies' >
+            </select>
+
+        </div>
+
+        <br>
+
+        <input style='width: 100%'
+        type='range' 
+        min='1'
+        max='{{ vid.length }}'
+        ng-model='frame' >
+
+        <button ng-click="upload()">Save Output</button>
+        <button ng-click="resetData()">Reset labeled data</button>
+        <span class="muted"><% save_status %></span>
+        
+        <br>
+
+        <!--<% svdict %>-->
+
+    </body>
+</html>

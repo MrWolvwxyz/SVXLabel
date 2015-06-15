@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Argument 1: video path (static/video/<algorithm>/<video>)
+
+path=$1
+
+sudo chown tylerganter $path/labeled/
+sudo chown tylerganter $path/data.json
+
+./finalize_output.py $path
+
+sudo chgrp -R www-data $path/labeled/

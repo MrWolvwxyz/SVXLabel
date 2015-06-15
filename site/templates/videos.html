@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Svxl Labeler Videos</title>
+
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/style.css") }}' />
+        <link rel="stylesheet" href='{{ url_for("static", filename="css/bootstrap.min.css") }}' />
+        <script src='{{ url_for("static", filename="js/bootstrap.min.js") }}'></script>
+
+    </head>
+
+    <body>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span2" style="text-align:center"><h1>Videos</h1></div>
+                <div class="span8" style="text-align:center"><h1>Instructions</h1></div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span2" style="overflow: auto; min-width: 100px;">
+                    <table class="table table-striped table-bordered table-condensed" style="max-width: 100%">
+                        <tr>
+                            <th>Select a video to label:</th>
+
+                        </tr>
+                        {% for vid_name in video_names %}
+                        <tr>
+                            <td>
+                                <a href="/select/{{ vid_name }}">{{vid_name }}</a>
+                            </td>
+                        {% endfor %}
+                    </table>
+
+
+                </div>
+                <div class="span3">
+                    <h2>Supervoxel Labeling</h2>
+                    
+                    <br>
+                    
+                    <p>Only <b>one</b> algorithm needs to be fully labeled here.</p>
+                    <p><b>Save</b> your data to come back to later or <b>Finish</b> to
+                    move on to the overlaying step.</p>
+                    
+                    <br>
+
+                    <p>Click on a label to set as current.</p>
+                    <p>Click or drag mouse across either canvas to label supervoxels.</p>
+
+                    <ol>
+                        <li>Choose labels and their colors, (Saving will save these settings).</li>
+                        <li>Label video. Save whenever needed.</li>
+                        <li>Hit finish and then move to the overlaying step.</li>
+                    </ol>
+
+                    <h3>Labels</h3>
+                    <ul>
+                        <li>Labels can be modified: add,remove,rename.</li>
+                        <li>You can also save and reset them.</li>
+                        <li>Use your best judgement on the level of detail to annotate
+                        <br>and create a label for each segment.</li>
+                        <li>While a label is selected, click the colorpicker to change it's color.</li>
+                    </ul>
+
+                    <h3>Video</h3>
+                    <p>Above Canvases:</p>
+                    <ul>
+                        <li>Opacity Slider - changes opacity of labels on left canvas</li>
+                        <li>Eyedropper - use this to toggle between eyedropper and labeling<br>
+                        When in eyedropper mode click any canvas to switch to the associated label.</li>
+                    </ul>
+                    <p>Left Canvas:</p>
+                    <ul>
+                        <li>This is the original video.</li>
+                        <li>The labels are overlayed on this.</li>
+                        <li>The slider above changes the opacity of the labels.</li>
+                    </ul>
+                    <p>Middle Canvas:</p>
+                    <ul>
+                        <li>The supervoxels are shown in this.</li>
+                        <li>If the chosen algorithm creates hierachies, <br>different levels in the hierarchy can be chosen.</li>
+                    </ul>
+                    <p>Right Canvas:</p>
+                    <ul>
+                        <li>The labels are shown in this.</li>
+                    </ul>
+                    <p>Below Canvases:</p>
+                    <ul>
+                        <li>Frame Number/Bump Frame</li>
+                        <li>FPS - frames per second</li>
+                        <li>Play - play video</li>
+                        <li>Undo - undo last click</li>
+                        <li>Hierarchy</li>
+                    </ul>
+                    <p>Save:</p>
+                    <ul>
+                        <li>Save - saves all label options and labels on video</li>
+                        <li>Reset labeled data - removes all labels from video</li>
+                        <li>Finish - generates output images which can now be loaded into
+                         the overlaying system</li>
+                        
+                    </ul>
+
+                    <h3>Rules</h3>
+                    <ul>
+                        <li>Each unique item of a class should have its own label, 
+                        <br>(i.e. person1, person2, etc...).</li>
+                        <li>Make sure the entire video is labeled before finishing.</li>
+                    </ul>
+
+                    <h3>Tips</h3>
+                    <ul>
+                        <li>Depending on the hierarchy chosen, different amounts of 
+                        the video will be colored.<br>Start with the highest
+                        level and work down to the details.<br>
+                        Skipping hierarchies is fine.</li>
+                        <li>To change the frame click Prev, Next, Play, move the 
+                        slider below the video, or scroll while the mouse is over 
+                        the video.</li>
+                        <li><b>*Important*</b> Reset buttons do not save the action.<br>
+                        Refresh the browser to restore the last save point.</li>
+                    </ul>
+                </div>
+                
+                <div class="span3">
+                    <h2>Supervoxel Overlaying</h2>
+                    
+                    <br>
+
+                    <ol>
+                        <li>Choose an algorithm and a label source.</li>
+                        <li>Fix labels as needed.</li>
+                        <li>Save the output.</li>
+                        <i>Optional:</i>
+                        <li>Return and choose another algorithm.<br>
+                        <b>Use 'Output' as your labeled-frame source.</b></li>
+                        <li>Repeat as needed or even return from Post-Processing step.</li>
+                    </ol>
+                    
+                    <h3>General</h3>
+                    <ul>
+                        <li>Everything on the interface is essentially the same.</li>
+                        <li>Use the DELETE label to remove labels that are less accurate than the original.</li>
+                        <li>Use the right-most canvas to see what changes you have made.</li>
+                        <li>Labels can be added but not removed.</li>
+                    </ul>
+                    
+                    <h3>Tips</h3>
+                    <ul>
+                        <li>Post-Processing is a frame-by-frame process.  This is very tedious!
+                          Do your best using uspervoxels to label!</li>
+                    </ul>
+                </div>
+                
+                <div class="span3">
+                    <h2>Post-Processing Labels</h2>
+                    
+                    <br>
+                    
+                    <ol>
+                        <li>Draw the correct labels on, frame-by-frame, using a resizable brush.</li>
+                        <li>Save changes before moving to the next frame.</li>
+                    </ol>
+
+                    <h3>Video</h3>
+                    <p>Brush</p>
+                    <ul>
+                        <li>Change the brush size here.</li>
+                    </ul>
+                    <p>Below Canvas:</p>
+                    <ul>
+                        <li>Jump to Start - sets frame 1 as current frame</li>
+                        <li>Undo - undo last click</li>
+                    </ul>
+                    <p>Save:</p>
+                    <ul>
+                        <li>Save - saves changes to current frame <b>only</b></li>
+                    </ul>
+
+                    <h3>Tips</h3>
+                    <ul>
+                        <li>Saving only effects the current frame.  Watch the video.
+                        Make sure you have a general idea of what is going on and where
+                        the major innaccuracies are.  Fix those, or start at the beginning
+                        and go through thoroughly frame-by-frame.</li>
+                        <li>By switching frames unsaved changes are lost.  The first time
+                        you try to, a warning will appear giving you the option to save
+                        or ignore.  Neither option will perform the frame-switching
+                        action.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

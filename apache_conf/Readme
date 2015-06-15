@@ -1,0 +1,7 @@
+Config is located here for revision control purposes.
+
+To enable, create a symbolic link from supervoxel.com to
+/etc/apache2/sites-available, then run a2enmod supervoxel.com.
+
+The .wsgi file is also located here, so that we do not risk leaking application
+source code to the internet when we Allow all.

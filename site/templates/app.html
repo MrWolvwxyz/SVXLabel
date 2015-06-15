@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Supervoxel Video Labeler
+{% endblock %}
+
+{% block htmlattrs %} ng-app="SVXLabel" {% endblock %}
+{% block bodyattrs %} ng-controller="VideoCtrl" {% endblock %}
+
+{% block includes %}
+<script src='{{ url_for("static", filename="js/services.js") }}'></script>
+<script src='{{ url_for("static", filename="js/directives.js") }}'></script>
+<script src='{{ url_for("static", filename="js/filters.js") }}'></script>
+<script src='{{ url_for("static", filename="js/controllers.js") }}'></script>
+{% endblock %}
+
+{% block content %}
+test
+{% endblock %}
