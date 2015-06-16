@@ -4,9 +4,9 @@
 
 path=$1
 
-sudo chown tylerganter $path/labeled/
-sudo chown tylerganter $path/data.json
+sudo chown sabean $path/labeled/
+sudo chown sabean $path/data.json
 
-./finalize_output.py $path
+./setup/finalize_output.py $path
 
 sudo chgrp -R www-data $path/labeled/
